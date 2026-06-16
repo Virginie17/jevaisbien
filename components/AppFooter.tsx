@@ -27,6 +27,7 @@ export default function AppFooter() {
             <h3 className="font-bold text-[#263238]">Virginie Assistance</h3>
             <div className="mt-4 space-y-3 text-sm text-[#607D8B]">
               <Link href="/activation" className="block hover:text-[#4F9F8A]">Demande d’activation</Link>
+              <Link href="/contact" className="block hover:text-[#4F9F8A]">Contact</Link>
               <a href="https://virginieassistance.fr" className="block hover:text-[#4F9F8A]" target="_blank" rel="noopener noreferrer">Site principal</a>
               <p>Accompagnement numérique seniors</p>
             </div>

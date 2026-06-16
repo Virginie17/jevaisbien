@@ -1,14 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { saveWellnessCheck } from "@/lib/storage";
+import { createWellnessCheck } from "@/lib/supabase-queries";
 
 export default function SeniorPage() {
   const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleWellnessCheck = () => {
+  const handleWellnessCheck = async () => {
+    setIsSaving(true);
+
     const check = {
       checkedAt: new Date().toISOString(),
       status: "ok" as const,
@@ -16,7 +20,10 @@ export default function SeniorPage() {
     };
 
     saveWellnessCheck(check);
+    await createWellnessCheck(check);
+
     setMessage("Merci, vos proches sont rassurés.");
+    setIsSaving(false);
   };
 
   return (
@@ -24,7 +31,6 @@ export default function SeniorPage() {
       <div className="mx-auto max-w-md">
         <div className="rounded-[2rem] border border-[#DCEBE6] bg-white p-6 text-center shadow-sm">
           <h1 className="text-4xl font-bold text-[#263238]">Bonjour</h1>
-
           <p className="mt-3 text-xl font-semibold text-[#4F9F8A]">Que souhaitez-vous faire ?</p>
 
           {message && (
@@ -37,10 +43,11 @@ export default function SeniorPage() {
             <button
               type="button"
               onClick={handleWellnessCheck}
-              className="min-h-32 w-full rounded-[2rem] bg-[#4F9F8A] px-6 text-3xl font-bold text-white shadow transition hover:bg-[#428B78]"
+              disabled={isSaving}
+              className="min-h-32 w-full rounded-[2rem] bg-[#4F9F8A] px-6 text-3xl font-bold text-white shadow transition hover:bg-[#428B78] disabled:opacity-70"
             >
               <Image src="/icons/je-vais-bien-heart-192.png" alt="" width={64} height={64} className="mx-auto mb-3 rounded-2xl" priority />
-              Je vais bien
+              {isSaving ? "Envoi..." : "Je vais bien"}
             </button>
 
             <Link href="/proches" className="flex min-h-32 w-full flex-col items-center justify-center rounded-[2rem] bg-[#5BA7D1] px-6 text-center text-3xl font-bold text-white shadow transition hover:bg-[#4A91B8]">

@@ -1,40 +1,41 @@
-interface ConfirmCallModalProps {
-  isOpen: boolean;
-  contactName: string;
-  contactPhone: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+import { FavoriteContact } from "@/lib/types";
 
-export default function ConfirmCallModal({
-  isOpen,
-  contactName,
-  contactPhone,
-  onConfirm,
-  onCancel,
-}: ConfirmCallModalProps) {
-  if (!isOpen) return null;
+type ConfirmCallModalProps = {
+  contact: FavoriteContact;
+  onClose: () => void;
+};
+
+export default function ConfirmCallModal({ contact, onClose }: ConfirmCallModalProps) {
+  const handleCall = () => {
+    if (!contact.phoneNumber) {
+      alert("Ce contact n’a pas encore de numéro configuré.");
+      return;
+    }
+
+    window.location.href = `tel:${contact.phoneNumber}`;
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-purple-900 rounded-2xl p-6 max-w-md w-full mx-4 border border-purple-700">
-        <h2 className="text-2xl font-serif font-bold text-white mb-4">Confirmer l'appel</h2>
-        <p className="text-purple-200 mb-2">
-          Voulez-vous vraiment appeler <span className="text-white font-semibold">{contactName}</span> ?
-        </p>
-        <p className="text-purple-300 mb-6">{contactPhone}</p>
-        <div className="flex gap-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[2rem] bg-white p-6 text-center shadow-xl">
+        <h2 className="text-3xl font-bold text-slate-900">Appeler {contact.firstName} ?</h2>
+        <p className="mt-4 text-xl text-slate-600">Voulez-vous lancer l’appel maintenant ?</p>
+
+        <div className="mt-8 space-y-4">
           <button
-            onClick={onCancel}
-            className="flex-1 bg-purple-700 text-white py-3 px-4 rounded-xl hover:bg-purple-600 transition"
+            type="button"
+            onClick={handleCall}
+            className="min-h-20 w-full rounded-3xl bg-green-600 px-6 text-2xl font-bold text-white transition hover:bg-green-700"
           >
-            Annuler
+            Oui, appeler
           </button>
+
           <button
-            onClick={onConfirm}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-xl hover:from-purple-600 hover:to-purple-700 transition"
+            type="button"
+            onClick={onClose}
+            className="min-h-20 w-full rounded-3xl bg-slate-100 px-6 text-2xl font-bold text-slate-700 transition hover:bg-slate-200"
           >
-            Appeler
+            Non, annuler
           </button>
         </div>
       </div>

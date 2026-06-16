@@ -3,16 +3,31 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FavoriteContact } from "@/lib/types";
-import { getStoredContacts } from "@/lib/storage";
+import { getStoredContacts, saveStoredContacts } from "@/lib/storage";
+import { fetchFavoriteContacts } from "@/lib/supabase-queries";
 import ContactCard from "@/components/ContactCard";
 import ConfirmCallModal from "@/components/ConfirmCallModal";
 
 export default function ProchesPage() {
   const [contacts, setContacts] = useState<FavoriteContact[]>([]);
   const [selectedContact, setSelectedContact] = useState<FavoriteContact | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setContacts(getStoredContacts().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)));
+    async function loadContacts() {
+      const localContacts = getStoredContacts().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+      setContacts(localContacts);
+
+      const remoteContacts = await fetchFavoriteContacts();
+      if (remoteContacts) {
+        setContacts(remoteContacts);
+        saveStoredContacts(remoteContacts);
+      }
+
+      setIsLoading(false);
+    }
+
+    loadContacts();
   }, []);
 
   return (
@@ -20,8 +35,10 @@ export default function ProchesPage() {
       <div className="mx-auto max-w-md">
         <div className="mb-6 text-center">
           <h1 className="text-4xl font-bold text-[#263238]">Qui voulez-vous joindre ?</h1>
-          <p className="mt-3 text-xl text-[#607D8B]">Touchez une photo, puis confirmez.</p>
+          <p className="mt-3 text-xl text-[#607D8B]">Touchez une carte, puis confirmez.</p>
         </div>
+
+        {isLoading && <p className="mb-4 text-center text-[#607D8B]">Chargement...</p>}
 
         <div className="space-y-4">
           {contacts.map((contact) => (

@@ -1,11 +1,11 @@
 {
-  "name": "Je Vais Bien",
-  "short_name": "JeVaisBien",
-  "description": "Application pour seniors et leurs proches",
-  "start_url": "/",
+  "name": "Je vais bien",
+  "short_name": "Je vais bien",
+  "description": "Application simple pour aider les seniors à garder le lien avec leurs proches.",
+  "start_url": "/senior",
   "display": "standalone",
-  "background_color": "#1a1528",
-  "theme_color": "#7c3aed",
+  "background_color": "#fff1f2",
+  "theme_color": "#be123c",
   "orientation": "portrait",
   "icons": [
     {

@@ -4,6 +4,18 @@ import { FavoriteContact, SeniorProfile, SubscriptionRequest, WellnessCheck } fr
 
 const profileIdStorageKey = "jeVaisBienSeniorProfileId";
 
+function logSupabaseError(context: string, error: unknown) {
+  if (!error) return;
+
+  const readableError = error instanceof Error
+    ? error.message
+    : typeof error === "object"
+      ? JSON.stringify(error, null, 2)
+      : String(error);
+
+  console.warn(`[Supabase] ${context} : ${readableError}`);
+}
+
 export async function fetchFavoriteContacts(): Promise<FavoriteContact[] | null> {
   if (!supabase) return null;
 
@@ -13,7 +25,7 @@ export async function fetchFavoriteContacts(): Promise<FavoriteContact[] | null>
     .order("display_order", { ascending: true });
 
   if (error) {
-    console.error(error);
+    logSupabaseError("lecture des contacts", error);
     return null;
   }
 
@@ -52,7 +64,7 @@ export async function upsertFavoriteContact(contact: FavoriteContact): Promise<F
     .single();
 
   if (error || !data) {
-    console.error(error);
+    logSupabaseError("enregistrement d'un contact", error);
     return null;
   }
 
@@ -71,7 +83,7 @@ export async function upsertFavoriteContact(contact: FavoriteContact): Promise<F
 export async function deleteFavoriteContact(id: string): Promise<boolean> {
   if (!supabase) return false;
   const { error } = await supabase.from("favorite_contacts").delete().eq("id", id);
-  if (error) console.error(error);
+  if (error) logSupabaseError("suppression d'un contact", error);
   return !error;
 }
 
@@ -86,7 +98,7 @@ export async function fetchLastWellnessCheck(): Promise<WellnessCheck | null> {
     .maybeSingle();
 
   if (error || !data) {
-    if (error) console.error(error);
+    if (error) logSupabaseError("lecture du dernier signal", error);
     return null;
   }
 
@@ -100,14 +112,23 @@ export async function fetchLastWellnessCheck(): Promise<WellnessCheck | null> {
 export async function createWellnessCheck(check: WellnessCheck): Promise<boolean> {
   if (!supabase) return false;
 
-  const { error } = await supabase.from("wellness_checks").insert({
-    status: check.status,
-    message: check.message,
-    checked_at: check.checkedAt,
-  });
+  try {
+    const { error } = await supabase.from("wellness_checks").insert({
+      status: check.status,
+      message: check.message,
+      checked_at: check.checkedAt,
+    });
 
-  if (error) console.error(error);
-  return !error;
+    if (error) {
+      logSupabaseError("enregistrement du signal", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    logSupabaseError("enregistrement du signal", error);
+    return false;
+  }
 }
 
 export async function fetchSeniorProfile(): Promise<SeniorProfile | null> {
@@ -121,7 +142,7 @@ export async function fetchSeniorProfile(): Promise<SeniorProfile | null> {
     .maybeSingle();
 
   if (error) {
-    console.error(error);
+    logSupabaseError("lecture du profil senior", error);
     return null;
   }
 
@@ -158,7 +179,7 @@ export async function saveRemoteSeniorProfile(profile: SeniorProfile): Promise<b
     .single();
 
   if (error || !data) {
-    console.error(error);
+    logSupabaseError("enregistrement du profil senior", error);
     return false;
   }
 
@@ -178,7 +199,7 @@ export async function fetchSubscriptionRequests(): Promise<SubscriptionRequest[]
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    logSupabaseError("lecture des demandes d'activation", error);
     return null;
   }
 
@@ -209,6 +230,10 @@ export async function createSubscriptionRequest(request: SubscriptionRequest): P
     created_at: request.createdAt,
   });
 
-  if (error) console.error(error);
-  return !error;
+  if (error) {
+    logSupabaseError("enregistrement d'une demande d'activation", error);
+    return false;
+  }
+
+  return true;
 }

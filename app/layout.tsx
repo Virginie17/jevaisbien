@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#be123c",
+  themeColor: "#4F9F8A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -51,13 +51,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-rose-50 text-slate-900">
-        {children}
-      </body>
+    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-[#F7FBF9] text-[#263238]">{children}</body>
     </html>
   );
 }

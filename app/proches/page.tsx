@@ -16,11 +16,11 @@ export default function ProchesPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-rose-50 px-4 py-8">
+    <main className="min-h-screen bg-[#F7FBF9] px-4 py-8">
       <div className="mx-auto max-w-md">
         <div className="mb-6 text-center">
-          <h1 className="text-4xl font-bold text-slate-900">Qui voulez-vous joindre ?</h1>
-          <p className="mt-3 text-xl text-slate-600">Touchez une photo, puis confirmez.</p>
+          <h1 className="text-4xl font-bold text-[#263238]">Qui voulez-vous joindre ?</h1>
+          <p className="mt-3 text-xl text-[#607D8B]">Touchez une photo, puis confirmez.</p>
         </div>
 
         <div className="space-y-4">
@@ -29,7 +29,7 @@ export default function ProchesPage() {
           ))}
         </div>
 
-        <Link href="/senior" className="mt-8 flex min-h-16 w-full items-center justify-center rounded-3xl bg-slate-900 px-6 text-xl font-bold text-white">
+        <Link href="/senior" className="mt-8 flex min-h-16 w-full items-center justify-center rounded-3xl bg-[#263238] px-6 text-xl font-bold text-white hover:bg-[#37474F]">
           Retour à mon accueil
         </Link>
       </div>

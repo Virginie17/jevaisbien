@@ -1,45 +1,3 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'senior' | 'family' | 'caregiver';
-  profilePicture?: string;
-}
-
-export interface Call {
-  id: string;
-  contactId: string;
-  timestamp: Date;
-  duration?: number;
-  status: 'completed' | 'missed' | 'cancelled';
-}
-
-export interface Notification {
-  id: string;
-  userId: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  type: 'info' | 'warning' | 'emergency';
-}
-
-export interface EmergencyContact {
-  id: string;
-  name: string;
-  phone: string;
-  relation: string;
-  priority: number;
-}
-
-export interface MedicationReminder {
-  id: string;
-  name: string;
-  dosage: string;
-  time: string;
-  frequency: string;
-  taken: boolean;
-}
-
 export type FavoriteContact = {
   id: string;
   firstName: string;
@@ -47,6 +5,7 @@ export type FavoriteContact = {
   phoneNumber: string;
   photoUrl?: string;
   isPrimary?: boolean;
+  isEmergency?: boolean;
   displayOrder?: number;
 };
 
@@ -54,4 +13,24 @@ export type WellnessCheck = {
   checkedAt: string;
   status: "ok";
   message: string;
+};
+
+export type SeniorProfile = {
+  firstName: string;
+  reminderTime: string;
+  message: string;
+};
+
+export type SubscriptionPlan = "Découverte" | "Famille" | "Sérénité";
+
+export type SubscriptionRequest = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  selectedPlan: SubscriptionPlan;
+  message?: string;
+  status: "pending" | "active";
+  createdAt: string;
 };

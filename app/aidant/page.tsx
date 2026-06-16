@@ -2,12 +2,13 @@
 
 import AppFooter from "@/components/AppFooter";
 import AppHeader from "@/components/AppHeader";
-import { FavoriteContact, SeniorProfile } from "@/lib/types";
+import { FavoriteContact, SeniorProfile, SubscriptionRequest } from "@/lib/types";
 import {
   defaultSeniorProfile,
   getLastWellnessCheck,
   getSeniorProfile,
   getStoredContacts,
+  getSubscriptionRequests,
   saveSeniorProfile,
   saveStoredContacts,
 } from "@/lib/storage";
@@ -35,6 +36,7 @@ const cardClass = "rounded-3xl border border-[#DCEBE6] bg-white p-6 shadow-sm";
 export default function AidantPage() {
   const [lastCheck, setLastCheck] = useState<LastCheck | null>(null);
   const [contacts, setContacts] = useState<FavoriteContact[]>([]);
+  const [requests, setRequests] = useState<SubscriptionRequest[]>([]);
   const [profile, setProfile] = useState<SeniorProfile>(defaultSeniorProfile);
   const [form, setForm] = useState<FavoriteContact>(emptyContact);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export default function AidantPage() {
   useEffect(() => {
     setLastCheck(getLastWellnessCheck());
     setContacts(getStoredContacts().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)));
+    setRequests(getSubscriptionRequests());
     setProfile(getSeniorProfile());
   }, []);
 
@@ -97,7 +100,7 @@ export default function AidantPage() {
           Configurez les informations du senior et les proches visibles depuis son écran.
         </p>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
           <div className={cardClass}>
             <h2 className="text-2xl font-bold text-[#263238]">Dernier signal</h2>
             {lastCheck ? (
@@ -115,7 +118,36 @@ export default function AidantPage() {
             <p className="mt-3 text-[#607D8B]">Formule actuelle : Découverte gratuite.</p>
             <p className="mt-2 text-sm text-[#78909C]">Le paiement en ligne pourra être ajouté plus tard avec Stripe.</p>
           </div>
+
+          <div className={cardClass}>
+            <h2 className="text-2xl font-bold text-[#263238]">Demandes</h2>
+            <p className="mt-3 text-4xl font-bold text-[#4F9F8A]">{requests.length}</p>
+            <p className="mt-2 text-sm text-[#78909C]">Demande(s) d’activation enregistrée(s)</p>
+          </div>
         </div>
+
+        {requests.length > 0 && (
+          <div className={`mt-6 ${cardClass}`}>
+            <h2 className="text-2xl font-bold text-[#263238]">Demandes d’activation</h2>
+            <div className="mt-5 space-y-3">
+              {requests.map((request) => (
+                <div key={request.id} className="rounded-2xl bg-[#EAF6F2] p-4">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                      <p className="text-lg font-bold text-[#263238]">{request.firstName} {request.lastName}</p>
+                      <p className="text-sm text-[#607D8B]">{request.email} · {request.phone}</p>
+                      {request.message && <p className="mt-2 text-sm text-[#607D8B]">{request.message}</p>}
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <p className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-[#4F9F8A]">{request.selectedPlan}</p>
+                      <p className="mt-2 text-xs text-[#78909C]">{new Date(request.createdAt).toLocaleDateString("fr-FR")}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleProfileSubmit} className={`mt-6 ${cardClass}`}>
           <h2 className="text-2xl font-bold text-[#263238]">Paramètres du senior</h2>

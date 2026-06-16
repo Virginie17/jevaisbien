@@ -1,5 +1,6 @@
 "use client";
 
+import AppFooter from "@/components/AppFooter";
 import AppHeader from "@/components/AppHeader";
 import { FavoriteContact, SeniorProfile } from "@/lib/types";
 import {
@@ -28,6 +29,9 @@ const emptyContact: FavoriteContact = {
   displayOrder: 1,
 };
 
+const inputClass = "w-full rounded-2xl border border-[#DCEBE6] bg-white px-4 py-3 text-[#263238] outline-none transition focus:border-[#4F9F8A] focus:ring-4 focus:ring-[#B9DED3]/50";
+const cardClass = "rounded-3xl border border-[#DCEBE6] bg-white p-6 shadow-sm";
+
 export default function AidantPage() {
   const [lastCheck, setLastCheck] = useState<LastCheck | null>(null);
   const [contacts, setContacts] = useState<FavoriteContact[]>([]);
@@ -49,7 +53,6 @@ export default function AidantPage() {
 
   const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     if (!form.firstName || !form.relationship || !form.phoneNumber) return;
 
     const nextContact: FavoriteContact = {
@@ -82,82 +85,82 @@ export default function AidantPage() {
   };
 
   return (
-    <main className="min-h-screen bg-rose-50">
+    <main className="min-h-screen bg-[#F7FBF9]">
       <AppHeader />
 
       <section className="mx-auto max-w-5xl px-4 py-10">
-        <p className="mb-4 inline-block rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-700 shadow-sm">
+        <p className="mb-4 inline-block rounded-full border border-[#DCEBE6] bg-white px-4 py-2 text-sm font-semibold text-[#4F9F8A] shadow-sm">
           Espace famille
         </p>
-        <h1 className="text-4xl font-bold text-slate-900">Espace aidant</h1>
-        <p className="mt-4 text-lg leading-8 text-slate-600">
+        <h1 className="text-4xl font-bold text-[#263238]">Espace aidant</h1>
+        <p className="mt-4 text-lg leading-8 text-[#607D8B]">
           Configurez les informations du senior et les proches visibles depuis son écran.
         </p>
 
         <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900">Dernier signal</h2>
+          <div className={cardClass}>
+            <h2 className="text-2xl font-bold text-[#263238]">Dernier signal</h2>
             {lastCheck ? (
-              <div className="mt-4 rounded-2xl bg-green-100 p-5 text-green-800">
+              <div className="mt-4 rounded-2xl bg-[#EAF6F2] p-5 text-[#2F7D6A]">
                 <p className="text-xl font-bold">{lastCheck.message}</p>
                 <p className="mt-2 text-sm">Envoyé le {new Date(lastCheck.checkedAt).toLocaleString("fr-FR")}</p>
               </div>
             ) : (
-              <p className="mt-4 text-slate-600">Aucun signal enregistré pour le moment.</p>
+              <p className="mt-4 text-[#607D8B]">Aucun signal enregistré pour le moment.</p>
             )}
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900">Ma formule</h2>
-            <p className="mt-3 text-slate-600">Formule actuelle : Découverte gratuite.</p>
-            <p className="mt-2 text-sm text-slate-500">Le paiement en ligne pourra être ajouté plus tard avec Stripe.</p>
+          <div className={cardClass}>
+            <h2 className="text-2xl font-bold text-[#263238]">Ma formule</h2>
+            <p className="mt-3 text-[#607D8B]">Formule actuelle : Découverte gratuite.</p>
+            <p className="mt-2 text-sm text-[#78909C]">Le paiement en ligne pourra être ajouté plus tard avec Stripe.</p>
           </div>
         </div>
 
-        <form onSubmit={handleProfileSubmit} className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-900">Paramètres du senior</h2>
+        <form onSubmit={handleProfileSubmit} className={`mt-6 ${cardClass}`}>
+          <h2 className="text-2xl font-bold text-[#263238]">Paramètres du senior</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Prénom</span>
-              <input value={profile.firstName} onChange={(event) => setProfile({ ...profile, firstName: event.target.value })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
+              <span className="text-sm font-semibold text-[#607D8B]">Prénom</span>
+              <input value={profile.firstName} onChange={(event) => setProfile({ ...profile, firstName: event.target.value })} className={inputClass} />
             </label>
             <label className="space-y-2">
-              <span className="text-sm font-semibold text-slate-700">Heure de rappel</span>
-              <input type="time" value={profile.reminderTime} onChange={(event) => setProfile({ ...profile, reminderTime: event.target.value })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
+              <span className="text-sm font-semibold text-[#607D8B]">Heure de rappel</span>
+              <input type="time" value={profile.reminderTime} onChange={(event) => setProfile({ ...profile, reminderTime: event.target.value })} className={inputClass} />
             </label>
             <label className="space-y-2 md:col-span-3">
-              <span className="text-sm font-semibold text-slate-700">Message de réassurance</span>
-              <input value={profile.message} onChange={(event) => setProfile({ ...profile, message: event.target.value })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
+              <span className="text-sm font-semibold text-[#607D8B]">Message de réassurance</span>
+              <input value={profile.message} onChange={(event) => setProfile({ ...profile, message: event.target.value })} className={inputClass} />
             </label>
           </div>
-          <button className="mt-5 rounded-full bg-rose-700 px-6 py-3 font-semibold text-white hover:bg-rose-800">Enregistrer les paramètres</button>
+          <button className="mt-5 rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78]">Enregistrer les paramètres</button>
         </form>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <form onSubmit={handleContactSubmit} className="rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900">{editingId ? "Modifier un proche" : "Ajouter un proche"}</h2>
+          <form onSubmit={handleContactSubmit} className={cardClass}>
+            <h2 className="text-2xl font-bold text-[#263238]">{editingId ? "Modifier un proche" : "Ajouter un proche"}</h2>
             <div className="mt-5 space-y-4">
-              <input placeholder="Prénom" value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
-              <input placeholder="Lien familial" value={form.relationship} onChange={(event) => setForm({ ...form, relationship: event.target.value })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
-              <input placeholder="Numéro de téléphone" value={form.phoneNumber} onChange={(event) => setForm({ ...form, phoneNumber: event.target.value })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
-              <input type="number" placeholder="Ordre d'affichage" value={form.displayOrder ?? 1} onChange={(event) => setForm({ ...form, displayOrder: Number(event.target.value) })} className="w-full rounded-2xl border border-rose-100 px-4 py-3" />
-              <label className="flex items-center gap-3 text-slate-700"><input type="checkbox" checked={!!form.isPrimary} onChange={(event) => setForm({ ...form, isPrimary: event.target.checked })} /> Contact principal</label>
-              <label className="flex items-center gap-3 text-slate-700"><input type="checkbox" checked={!!form.isEmergency} onChange={(event) => setForm({ ...form, isEmergency: event.target.checked })} /> Contact utile</label>
+              <input placeholder="Prénom" value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className={inputClass} />
+              <input placeholder="Lien familial" value={form.relationship} onChange={(event) => setForm({ ...form, relationship: event.target.value })} className={inputClass} />
+              <input placeholder="Numéro de téléphone" value={form.phoneNumber} onChange={(event) => setForm({ ...form, phoneNumber: event.target.value })} className={inputClass} />
+              <input type="number" placeholder="Ordre d'affichage" value={form.displayOrder ?? 1} onChange={(event) => setForm({ ...form, displayOrder: Number(event.target.value) })} className={inputClass} />
+              <label className="flex items-center gap-3 text-[#607D8B]"><input type="checkbox" checked={!!form.isPrimary} onChange={(event) => setForm({ ...form, isPrimary: event.target.checked })} /> Contact principal</label>
+              <label className="flex items-center gap-3 text-[#607D8B]"><input type="checkbox" checked={!!form.isEmergency} onChange={(event) => setForm({ ...form, isEmergency: event.target.checked })} /> Contact utile</label>
             </div>
-            <button className="mt-5 w-full rounded-full bg-rose-700 px-6 py-3 font-semibold text-white hover:bg-rose-800">{editingId ? "Enregistrer" : "Ajouter"}</button>
+            <button className="mt-5 w-full rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78]">{editingId ? "Enregistrer" : "Ajouter"}</button>
           </form>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900">Contacts du senior</h2>
+          <div className={cardClass}>
+            <h2 className="text-2xl font-bold text-[#263238]">Contacts du senior</h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {contacts.map((contact) => (
-                <div key={contact.id} className="rounded-2xl bg-rose-50 p-4">
-                  <p className="text-xl font-bold text-slate-900">{contact.firstName}</p>
-                  <p className="text-slate-600">{contact.relationship}</p>
-                  <p className="mt-2 text-sm text-slate-500">{contact.phoneNumber}</p>
+                <div key={contact.id} className="rounded-2xl bg-[#EAF6F2] p-4">
+                  <p className="text-xl font-bold text-[#263238]">{contact.firstName}</p>
+                  <p className="text-[#607D8B]">{contact.relationship}</p>
+                  <p className="mt-2 text-sm text-[#78909C]">{contact.phoneNumber}</p>
                   <div className="mt-4 flex gap-2">
-                    <button type="button" onClick={() => handleEditContact(contact)} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-700">Modifier</button>
-                    <button type="button" onClick={() => handleDeleteContact(contact.id)} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Supprimer</button>
+                    <button type="button" onClick={() => handleEditContact(contact)} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4F9F8A]">Modifier</button>
+                    <button type="button" onClick={() => handleDeleteContact(contact.id)} className="rounded-full bg-[#263238] px-4 py-2 text-sm font-semibold text-white">Supprimer</button>
                   </div>
                 </div>
               ))}
@@ -165,6 +168,8 @@ export default function AidantPage() {
           </div>
         </div>
       </section>
+
+      <AppFooter />
     </main>
   );
 }

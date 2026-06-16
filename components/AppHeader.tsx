@@ -1,36 +1,20 @@
 import Link from "next/link";
-import Image from "next/image";
+import AppLogo from "./AppLogo";
 
 export default function AppHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-rose-100 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-[#DCEBE6] bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-        <Link href="/" className="flex items-center gap-3 no-underline">
-          <Image
-            src="/icon-192.png"
-            alt="Icône Je vais bien"
-            width={42}
-            height={42}
-            className="rounded-2xl"
-            priority
-          />
+        <AppLogo />
 
-          <div className="leading-tight">
-            <p className="text-lg font-bold text-slate-900">Je vais bien</p>
-            <p className="hidden text-xs font-semibold text-rose-700 sm:block">
-              Je rassure les miens
-            </p>
-          </div>
-        </Link>
-
-        <nav className="flex items-center gap-1 text-sm font-semibold text-slate-600 sm:gap-3">
-          <Link href="/senior" className="rounded-full px-3 py-2 transition hover:bg-rose-50 hover:text-rose-700">
+        <nav className="flex items-center gap-1 text-sm font-semibold text-[#607D8B] sm:gap-3">
+          <Link href="/senior" className="rounded-full px-3 py-2 transition hover:bg-[#EAF6F2] hover:text-[#4F9F8A]">
             Senior
           </Link>
-          <Link href="/aidant" className="rounded-full px-3 py-2 transition hover:bg-rose-50 hover:text-rose-700">
+          <Link href="/aidant" className="rounded-full px-3 py-2 transition hover:bg-[#EAF6F2] hover:text-[#4F9F8A]">
             Aidant
           </Link>
-          <Link href="/installation" className="hidden rounded-full px-3 py-2 transition hover:bg-rose-50 hover:text-rose-700 sm:inline-block">
+          <Link href="/installation" className="hidden rounded-full px-3 py-2 transition hover:bg-[#EAF6F2] hover:text-[#4F9F8A] sm:inline-block">
             Installer
           </Link>
         </nav>

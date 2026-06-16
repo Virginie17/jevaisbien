@@ -5,7 +5,7 @@ export default function AppFooter() {
   return (
     <footer className="border-t border-[#DCEBE6] bg-white">
       <div className="mx-auto max-w-5xl px-4 py-10">
-        <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
+        <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
           <div>
             <AppLogo />
             <p className="mt-4 max-w-sm text-sm leading-6 text-[#607D8B]">
@@ -29,6 +29,14 @@ export default function AppFooter() {
               <Link href="/activation" className="block hover:text-[#4F9F8A]">Demande d’activation</Link>
               <a href="https://virginieassistance.fr" className="block hover:text-[#4F9F8A]" target="_blank" rel="noopener noreferrer">Site principal</a>
               <p>Accompagnement numérique seniors</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-[#263238]">Informations</h3>
+            <div className="mt-4 space-y-3 text-sm text-[#607D8B]">
+              <Link href="/confidentialite" className="block hover:text-[#4F9F8A]">Confidentialité</Link>
+              <Link href="/mentions-legales" className="block hover:text-[#4F9F8A]">Mentions légales</Link>
             </div>
           </div>
         </div>

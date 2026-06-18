@@ -1,6 +1,6 @@
 import { demoContacts } from "./contacts";
 import { supabase } from "./supabase";
-import { FavoriteContact, SeniorProfile, SubscriptionRequest, WellnessCheck } from "./types";
+import { FavoriteContact, SeniorProfile, Subscription, SubscriptionRequest, WellnessCheck } from "./types";
 
 const profileIdStorageKey = "jeVaisBienSeniorProfileId";
 
@@ -21,7 +21,7 @@ export async function fetchFavoriteContacts(): Promise<FavoriteContact[] | null>
 
   const { data, error } = await supabase
     .from("favorite_contacts")
-    .select("id, first_name, relationship, phone_number, photo_url, is_primary, is_emergency, display_order")
+    .select("id, senior_id, first_name, relationship, phone_number, photo_url, is_primary, display_order")
     .order("display_order", { ascending: true });
 
   if (error) {
@@ -33,12 +33,12 @@ export async function fetchFavoriteContacts(): Promise<FavoriteContact[] | null>
 
   return data.map((contact) => ({
     id: contact.id,
+    seniorId: contact.senior_id ?? undefined,
     firstName: contact.first_name,
     relationship: contact.relationship,
     phoneNumber: contact.phone_number,
     photoUrl: contact.photo_url ?? undefined,
     isPrimary: contact.is_primary,
-    isEmergency: contact.is_emergency,
     displayOrder: contact.display_order,
   }));
 }
@@ -48,19 +48,19 @@ export async function upsertFavoriteContact(contact: FavoriteContact): Promise<F
 
   const payload = {
     id: contact.id || undefined,
+    senior_id: contact.seniorId ?? null,
     first_name: contact.firstName,
     relationship: contact.relationship,
     phone_number: contact.phoneNumber,
     photo_url: contact.photoUrl ?? null,
     is_primary: !!contact.isPrimary,
-    is_emergency: !!contact.isEmergency,
-    display_order: contact.displayOrder ?? 1,
+    display_order: contact.displayOrder ?? 0,
   };
 
   const { data, error } = await supabase
     .from("favorite_contacts")
     .upsert(payload)
-    .select("id, first_name, relationship, phone_number, photo_url, is_primary, is_emergency, display_order")
+    .select("id, senior_id, first_name, relationship, phone_number, photo_url, is_primary, display_order")
     .single();
 
   if (error || !data) {
@@ -70,12 +70,12 @@ export async function upsertFavoriteContact(contact: FavoriteContact): Promise<F
 
   return {
     id: data.id,
+    seniorId: data.senior_id ?? undefined,
     firstName: data.first_name,
     relationship: data.relationship,
     phoneNumber: data.phone_number,
     photoUrl: data.photo_url ?? undefined,
     isPrimary: data.is_primary,
-    isEmergency: data.is_emergency,
     displayOrder: data.display_order,
   };
 }
@@ -92,7 +92,7 @@ export async function fetchLastWellnessCheck(): Promise<WellnessCheck | null> {
 
   const { data, error } = await supabase
     .from("wellness_checks")
-    .select("checked_at, status, message")
+    .select("id, senior_id, checked_at, status, message")
     .order("checked_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -103,9 +103,11 @@ export async function fetchLastWellnessCheck(): Promise<WellnessCheck | null> {
   }
 
   return {
+    id: data.id,
+    seniorId: data.senior_id ?? undefined,
     checkedAt: data.checked_at,
-    status: "ok",
-    message: data.message,
+    status: data.status,
+    message: data.message ?? undefined,
   };
 }
 
@@ -114,8 +116,9 @@ export async function createWellnessCheck(check: WellnessCheck): Promise<boolean
 
   try {
     const { error } = await supabase.from("wellness_checks").insert({
+      senior_id: check.seniorId ?? null,
       status: check.status,
-      message: check.message,
+      message: check.message ?? null,
       checked_at: check.checkedAt,
     });
 
@@ -136,7 +139,7 @@ export async function fetchSeniorProfile(): Promise<SeniorProfile | null> {
 
   const { data, error } = await supabase
     .from("senior_profiles")
-    .select("id, first_name, reminder_time, message")
+    .select("id, last_name, first_name, reminder_time, is_active")
     .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
@@ -153,9 +156,11 @@ export async function fetchSeniorProfile(): Promise<SeniorProfile | null> {
   }
 
   return {
+    id: data.id,
+    lastName: data.last_name ?? undefined,
     firstName: data.first_name,
-    reminderTime: data.reminder_time,
-    message: data.message,
+    reminderTime: data.reminder_time ?? "09:00",
+    isActive: data.is_active,
   };
 }
 
@@ -165,10 +170,11 @@ export async function saveRemoteSeniorProfile(profile: SeniorProfile): Promise<b
   const storedId = typeof window !== "undefined" ? window.localStorage.getItem(profileIdStorageKey) : null;
 
   const payload = {
-    ...(storedId ? { id: storedId } : {}),
+    ...(profile.id || storedId ? { id: profile.id ?? storedId } : {}),
+    last_name: profile.lastName ?? null,
     first_name: profile.firstName,
     reminder_time: profile.reminderTime,
-    message: profile.message,
+    is_active: profile.isActive,
     updated_at: new Date().toISOString(),
   };
 
@@ -236,4 +242,28 @@ export async function createSubscriptionRequest(request: SubscriptionRequest): P
   }
 
   return true;
+}
+
+export async function fetchSubscriptions(): Promise<Subscription[] | null> {
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("id, user_email, plan_name, status, stripe_session_id, amount, started_at")
+    .order("started_at", { ascending: false });
+
+  if (error) {
+    logSupabaseError("lecture des abonnements", error);
+    return null;
+  }
+
+  return (data ?? []).map((subscription) => ({
+    id: subscription.id,
+    userEmail: subscription.user_email,
+    planName: subscription.plan_name,
+    status: subscription.status,
+    stripeSessionId: subscription.stripe_session_id ?? undefined,
+    amount: subscription.amount ?? undefined,
+    startedAt: subscription.started_at ?? undefined,
+  }));
 }

@@ -3,6 +3,11 @@ import { supabase } from "./supabase";
 import { FavoriteContact, SeniorProfile, Subscription, SubscriptionRequest, WellnessCheck } from "./types";
 
 const profileIdStorageKey = "jeVaisBienSeniorProfileId";
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isUuid(value?: string | null) {
+  return Boolean(value && uuidRegex.test(value));
+}
 
 function logSupabaseError(context: string, error: unknown) {
   if (!error) return;
@@ -47,8 +52,8 @@ export async function upsertFavoriteContact(contact: FavoriteContact): Promise<F
   if (!supabase) return null;
 
   const payload = {
-    id: contact.id || undefined,
-    senior_id: contact.seniorId ?? null,
+    ...(isUuid(contact.id) ? { id: contact.id } : {}),
+    senior_id: isUuid(contact.seniorId) ? contact.seniorId : null,
     first_name: contact.firstName,
     relationship: contact.relationship,
     phone_number: contact.phoneNumber,
@@ -81,7 +86,7 @@ export async function upsertFavoriteContact(contact: FavoriteContact): Promise<F
 }
 
 export async function deleteFavoriteContact(id: string): Promise<boolean> {
-  if (!supabase) return false;
+  if (!supabase || !isUuid(id)) return false;
   const { error } = await supabase.from("favorite_contacts").delete().eq("id", id);
   if (error) logSupabaseError("suppression d'un contact", error);
   return !error;
@@ -116,7 +121,7 @@ export async function createWellnessCheck(check: WellnessCheck): Promise<boolean
 
   try {
     const { error } = await supabase.from("wellness_checks").insert({
-      senior_id: check.seniorId ?? null,
+      senior_id: isUuid(check.seniorId) ? check.seniorId : null,
       status: check.status,
       message: check.message ?? null,
       checked_at: check.checkedAt,
@@ -168,9 +173,10 @@ export async function saveRemoteSeniorProfile(profile: SeniorProfile): Promise<b
   if (!supabase) return false;
 
   const storedId = typeof window !== "undefined" ? window.localStorage.getItem(profileIdStorageKey) : null;
+  const profileId = isUuid(profile.id) ? profile.id : isUuid(storedId) ? storedId : null;
 
   const payload = {
-    ...(profile.id || storedId ? { id: profile.id ?? storedId } : {}),
+    ...(profileId ? { id: profileId } : {}),
     last_name: profile.lastName ?? null,
     first_name: profile.firstName,
     reminder_time: profile.reminderTime,

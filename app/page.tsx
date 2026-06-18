@@ -2,6 +2,7 @@ import Link from "next/link";
 import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
 import CheckoutButton from "@/components/CheckoutButton";
+import { SubscriptionPlan } from "@/lib/types";
 
 const steps = [
   { title: "1. Je clique", text: "Le senior appuie sur le bouton Je vais bien depuis un écran très simple." },
@@ -9,11 +10,22 @@ const steps = [
   { title: "3. Je garde le lien", text: "Le senior accède facilement à ses proches depuis de grandes cartes lisibles." },
 ];
 
-const plans = [
+type Plan = {
+  name: "Découverte" | SubscriptionPlan;
+  price: string;
+  description: string;
+  features: string[];
+};
+
+const plans: Plan[] = [
   { name: "Découverte", price: "Gratuit", description: "Pour tester l'application avec une configuration simple.", features: ["1 senior", "1 aidant", "3 contacts", "Bouton Je vais bien"] },
   { name: "Famille", price: "4,90 € / mois", description: "Pour une utilisation familiale plus complète.", features: ["Plusieurs aidants", "Jusqu'à 6 contacts", "Suivi simple", "Contacts favoris"] },
   { name: "Sérénité", price: "9,90 € / mois", description: "Avec accompagnement par Virginie Assistance Numérique.", features: ["Installation accompagnée", "Configuration", "Explication", "Suivi personnalisé"] },
 ];
+
+function isPaidPlan(planName: Plan["name"]): planName is SubscriptionPlan {
+  return planName === "Famille" || planName === "Sérénité";
+}
 
 export default function HomePage() {
   return (
@@ -75,12 +87,12 @@ export default function HomePage() {
                 <ul className="mt-5 space-y-2 text-sm text-[#607D8B]">
                   {plan.features.map((feature) => <li key={feature}>✓ {feature}</li>)}
                 </ul>
-                {plan.name === "Découverte" ? (
+                {isPaidPlan(plan.name) ? (
+                  <CheckoutButton planName={plan.name} label={`Choisir ${plan.name}`} />
+                ) : (
                   <Link href="/activation" className="mt-6 flex min-h-12 items-center justify-center rounded-full bg-[#4F9F8A] px-5 font-semibold text-white hover:bg-[#428B78]">
                     Demander l’activation
                   </Link>
-                ) : (
-                  <CheckoutButton planName={plan.name} label={`Choisir ${plan.name}`} />
                 )}
               </div>
             ))}

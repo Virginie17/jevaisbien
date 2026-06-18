@@ -8,8 +8,9 @@ const SUBSCRIPTION_REQUESTS_KEY = "jeVaisBienSubscriptionRequests";
 
 export const defaultSeniorProfile: SeniorProfile = {
   firstName: "Mamie",
+  lastName: "",
   reminderTime: "09:00",
-  message: "Je vais bien, tout va bien, je rassure les miens.",
+  isActive: true,
 };
 
 export function getStoredContacts(): FavoriteContact[] {

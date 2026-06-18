@@ -5,24 +5,25 @@ import Link from "next/link";
 import { useState } from "react";
 import { saveWellnessCheck } from "@/lib/storage";
 import { createWellnessCheck } from "@/lib/supabase-queries";
+import { WellnessStatus } from "@/lib/types";
 
 export default function SeniorPage() {
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleWellnessCheck = async () => {
+  const handleWellnessCheck = async (status: WellnessStatus) => {
     setIsSaving(true);
 
     const check = {
       checkedAt: new Date().toISOString(),
-      status: "ok" as const,
-      message: "Je vais bien, tout va bien, je rassure les miens.",
+      status,
+      message: status === "bien" ? "Je vais bien, tout va bien, je rassure les miens." : "J’ai besoin d’aide.",
     };
 
     saveWellnessCheck(check);
     await createWellnessCheck(check);
 
-    setMessage("Merci, vos proches sont rassurés.");
+    setMessage(status === "bien" ? "Merci, vos proches sont rassurés." : "Votre demande d’aide a été enregistrée.");
     setIsSaving(false);
   };
 
@@ -42,12 +43,21 @@ export default function SeniorPage() {
           <div className="mt-8 space-y-5">
             <button
               type="button"
-              onClick={handleWellnessCheck}
+              onClick={() => handleWellnessCheck("bien")}
               disabled={isSaving}
               className="min-h-32 w-full rounded-[2rem] bg-[#4F9F8A] px-6 text-3xl font-bold text-white shadow transition hover:bg-[#428B78] disabled:opacity-70"
             >
               <Image src="/icons/je-vais-bien-heart-192.png" alt="" width={64} height={64} className="mx-auto mb-3 rounded-2xl" priority />
               {isSaving ? "Envoi..." : "Je vais bien"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleWellnessCheck("besoin_aide")}
+              disabled={isSaving}
+              className="min-h-28 w-full rounded-[2rem] bg-[#F59E0B] px-6 text-3xl font-bold text-white shadow transition hover:bg-[#D97706] disabled:opacity-70"
+            >
+              J’ai besoin d’aide
             </button>
 
             <Link href="/proches" className="flex min-h-32 w-full flex-col items-center justify-center rounded-[2rem] bg-[#5BA7D1] px-6 text-center text-3xl font-bold text-white shadow transition hover:bg-[#4A91B8]">
@@ -56,7 +66,7 @@ export default function SeniorPage() {
             </Link>
           </div>
 
-          <p className="mt-6 text-base text-[#78909C]">Deux choix simples pour rester serein.</p>
+          <p className="mt-6 text-base text-[#78909C]">Trois choix simples pour rester serein.</p>
         </div>
       </div>
     </main>

@@ -6,7 +6,7 @@ export const isStripeConfigured = Boolean(stripeSecretKey);
 
 export const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: "2025-11-17.clover",
+      apiVersion: "2026-02-25.clover",
       typescript: true,
     })
   : null;

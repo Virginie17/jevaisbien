@@ -32,11 +32,6 @@ export default function ContactCard({ contact, onSelect }: ContactCardProps) {
               Contact principal
             </p>
           )}
-          {contact.isEmergency && (
-            <p className="mt-2 inline-block rounded-full bg-[#FFF3E0] px-3 py-1 text-sm font-semibold text-[#C77700]">
-              Contact utile
-            </p>
-          )}
         </div>
       </div>
     </button>

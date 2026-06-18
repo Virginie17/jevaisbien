@@ -2,7 +2,7 @@
 
 import AppFooter from "@/components/AppFooter";
 import AppHeader from "@/components/AppHeader";
-import { FavoriteContact, SeniorProfile, SubscriptionRequest } from "@/lib/types";
+import { FavoriteContact, SeniorProfile, SubscriptionRequest, WellnessCheck } from "@/lib/types";
 import {
   defaultSeniorProfile,
   getLastWellnessCheck,
@@ -12,13 +12,16 @@ import {
   saveSeniorProfile,
   saveStoredContacts,
 } from "@/lib/storage";
+import {
+  deleteFavoriteContact,
+  fetchFavoriteContacts,
+  fetchLastWellnessCheck,
+  fetchSeniorProfile,
+  fetchSubscriptionRequests,
+  saveRemoteSeniorProfile,
+  upsertFavoriteContact,
+} from "@/lib/supabase-queries";
 import { FormEvent, useEffect, useState } from "react";
-
-type LastCheck = {
-  checkedAt: string;
-  status: string;
-  message?: string;
-};
 
 const emptyContact: FavoriteContact = {
   id: "",
@@ -33,18 +36,45 @@ const inputClass = "w-full rounded-2xl border border-[#DCEBE6] bg-white px-4 py-
 const cardClass = "rounded-3xl border border-[#DCEBE6] bg-white p-6 shadow-sm";
 
 export default function AidantPage() {
-  const [lastCheck, setLastCheck] = useState<LastCheck | null>(null);
+  const [lastCheck, setLastCheck] = useState<WellnessCheck | null>(null);
   const [contacts, setContacts] = useState<FavoriteContact[]>([]);
   const [requests, setRequests] = useState<SubscriptionRequest[]>([]);
   const [profile, setProfile] = useState<SeniorProfile>(defaultSeniorProfile);
   const [form, setForm] = useState<FavoriteContact>(emptyContact);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingContact, setIsSavingContact] = useState(false);
 
   useEffect(() => {
-    setLastCheck(getLastWellnessCheck());
-    setContacts(getStoredContacts().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)));
-    setRequests(getSubscriptionRequests());
-    setProfile(getSeniorProfile());
+    async function loadDashboard() {
+      setLastCheck(getLastWellnessCheck());
+      setContacts(getStoredContacts().sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)));
+      setRequests(getSubscriptionRequests());
+      setProfile(getSeniorProfile());
+
+      const [remoteCheck, remoteContacts, remoteRequests, remoteProfile] = await Promise.all([
+        fetchLastWellnessCheck(),
+        fetchFavoriteContacts(),
+        fetchSubscriptionRequests(),
+        fetchSeniorProfile(),
+      ]);
+
+      if (remoteCheck) setLastCheck(remoteCheck);
+      if (remoteContacts) {
+        setContacts(remoteContacts);
+        saveStoredContacts(remoteContacts);
+      }
+      if (remoteRequests) setRequests(remoteRequests);
+      if (remoteProfile) {
+        setProfile(remoteProfile);
+        saveSeniorProfile(remoteProfile);
+      }
+
+      setIsLoading(false);
+    }
+
+    loadDashboard();
   }, []);
 
   const persistContacts = (nextContacts: FavoriteContact[]) => {
@@ -53,15 +83,21 @@ export default function AidantPage() {
     saveStoredContacts(sorted);
   };
 
-  const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!form.firstName || !form.relationship || !form.phoneNumber) return;
 
-    const nextContact: FavoriteContact = {
+    setIsSavingContact(true);
+
+    const localContact: FavoriteContact = {
       ...form,
-      id: editingId ?? crypto.randomUUID(),
+      id: editingId ?? form.id ?? crypto.randomUUID(),
+      seniorId: profile.id,
       displayOrder: Number(form.displayOrder) || contacts.length,
     };
+
+    const remoteContact = await upsertFavoriteContact(localContact);
+    const nextContact = remoteContact ?? localContact;
 
     const nextContacts = editingId
       ? contacts.map((contact) => (contact.id === editingId ? nextContact : contact))
@@ -70,6 +106,7 @@ export default function AidantPage() {
     persistContacts(nextContacts);
     setForm(emptyContact);
     setEditingId(null);
+    setIsSavingContact(false);
   };
 
   const handleEditContact = (contact: FavoriteContact) => {
@@ -77,13 +114,22 @@ export default function AidantPage() {
     setForm(contact);
   };
 
-  const handleDeleteContact = (id: string) => {
+  const handleDeleteContact = async (id: string) => {
+    await deleteFavoriteContact(id);
     persistContacts(contacts.filter((contact) => contact.id !== id));
   };
 
-  const handleProfileSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsSavingProfile(true);
     saveSeniorProfile(profile);
+    await saveRemoteSeniorProfile(profile);
+    const remoteProfile = await fetchSeniorProfile();
+    if (remoteProfile) {
+      setProfile(remoteProfile);
+      saveSeniorProfile(remoteProfile);
+    }
+    setIsSavingProfile(false);
   };
 
   return (
@@ -99,11 +145,13 @@ export default function AidantPage() {
           Configurez les informations du senior et les proches visibles depuis son écran.
         </p>
 
+        {isLoading && <p className="mt-4 text-sm font-semibold text-[#4F9F8A]">Synchronisation Supabase en cours...</p>}
+
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           <div className={cardClass}>
             <h2 className="text-2xl font-bold text-[#263238]">Dernier signal</h2>
             {lastCheck ? (
-              <div className="mt-4 rounded-2xl bg-[#EAF6F2] p-5 text-[#2F7D6A]">
+              <div className={`mt-4 rounded-2xl p-5 ${lastCheck.status === "besoin_aide" ? "bg-[#FFF3E0] text-[#C77700]" : "bg-[#EAF6F2] text-[#2F7D6A]"}`}>
                 <p className="text-xl font-bold">{lastCheck.message ?? (lastCheck.status === "bien" ? "Tout va bien" : "Besoin d’aide")}</p>
                 <p className="mt-2 text-sm">Envoyé le {new Date(lastCheck.checkedAt).toLocaleString("fr-FR")}</p>
               </div>
@@ -167,7 +215,9 @@ export default function AidantPage() {
               <input type="checkbox" checked={profile.isActive} onChange={(event) => setProfile({ ...profile, isActive: event.target.checked })} /> Senior actif
             </label>
           </div>
-          <button className="mt-5 rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78]">Enregistrer les paramètres</button>
+          <button disabled={isSavingProfile} className="mt-5 rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78] disabled:opacity-70">
+            {isSavingProfile ? "Enregistrement..." : "Enregistrer les paramètres"}
+          </button>
         </form>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
@@ -180,7 +230,7 @@ export default function AidantPage() {
               <input type="number" placeholder="Ordre d'affichage" value={form.displayOrder ?? 0} onChange={(event) => setForm({ ...form, displayOrder: Number(event.target.value) })} className={inputClass} />
               <label className="flex items-center gap-3 text-[#607D8B]"><input type="checkbox" checked={!!form.isPrimary} onChange={(event) => setForm({ ...form, isPrimary: event.target.checked })} /> Contact principal</label>
             </div>
-            <button className="mt-5 w-full rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78]">{editingId ? "Enregistrer" : "Ajouter"}</button>
+            <button disabled={isSavingContact} className="mt-5 w-full rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78] disabled:opacity-70">{isSavingContact ? "Enregistrement..." : editingId ? "Enregistrer" : "Ajouter"}</button>
           </form>
 
           <div className={cardClass}>

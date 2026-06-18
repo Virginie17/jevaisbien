@@ -17,7 +17,7 @@ import { FormEvent, useEffect, useState } from "react";
 type LastCheck = {
   checkedAt: string;
   status: string;
-  message: string;
+  message?: string;
 };
 
 const emptyContact: FavoriteContact = {
@@ -26,8 +26,7 @@ const emptyContact: FavoriteContact = {
   relationship: "",
   phoneNumber: "",
   isPrimary: false,
-  isEmergency: false,
-  displayOrder: 1,
+  displayOrder: 0,
 };
 
 const inputClass = "w-full rounded-2xl border border-[#DCEBE6] bg-white px-4 py-3 text-[#263238] outline-none transition focus:border-[#4F9F8A] focus:ring-4 focus:ring-[#B9DED3]/50";
@@ -61,7 +60,7 @@ export default function AidantPage() {
     const nextContact: FavoriteContact = {
       ...form,
       id: editingId ?? crypto.randomUUID(),
-      displayOrder: Number(form.displayOrder) || contacts.length + 1,
+      displayOrder: Number(form.displayOrder) || contacts.length,
     };
 
     const nextContacts = editingId
@@ -105,7 +104,7 @@ export default function AidantPage() {
             <h2 className="text-2xl font-bold text-[#263238]">Dernier signal</h2>
             {lastCheck ? (
               <div className="mt-4 rounded-2xl bg-[#EAF6F2] p-5 text-[#2F7D6A]">
-                <p className="text-xl font-bold">{lastCheck.message}</p>
+                <p className="text-xl font-bold">{lastCheck.message ?? (lastCheck.status === "bien" ? "Tout va bien" : "Besoin d’aide")}</p>
                 <p className="mt-2 text-sm">Envoyé le {new Date(lastCheck.checkedAt).toLocaleString("fr-FR")}</p>
               </div>
             ) : (
@@ -157,12 +156,15 @@ export default function AidantPage() {
               <input value={profile.firstName} onChange={(event) => setProfile({ ...profile, firstName: event.target.value })} className={inputClass} />
             </label>
             <label className="space-y-2">
+              <span className="text-sm font-semibold text-[#607D8B]">Nom</span>
+              <input value={profile.lastName ?? ""} onChange={(event) => setProfile({ ...profile, lastName: event.target.value })} className={inputClass} />
+            </label>
+            <label className="space-y-2">
               <span className="text-sm font-semibold text-[#607D8B]">Heure de rappel</span>
               <input type="time" value={profile.reminderTime} onChange={(event) => setProfile({ ...profile, reminderTime: event.target.value })} className={inputClass} />
             </label>
-            <label className="space-y-2 md:col-span-3">
-              <span className="text-sm font-semibold text-[#607D8B]">Message de réassurance</span>
-              <input value={profile.message} onChange={(event) => setProfile({ ...profile, message: event.target.value })} className={inputClass} />
+            <label className="flex items-center gap-3 text-[#607D8B] md:col-span-3">
+              <input type="checkbox" checked={profile.isActive} onChange={(event) => setProfile({ ...profile, isActive: event.target.checked })} /> Senior actif
             </label>
           </div>
           <button className="mt-5 rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78]">Enregistrer les paramètres</button>
@@ -175,9 +177,8 @@ export default function AidantPage() {
               <input placeholder="Prénom" value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className={inputClass} />
               <input placeholder="Lien familial" value={form.relationship} onChange={(event) => setForm({ ...form, relationship: event.target.value })} className={inputClass} />
               <input placeholder="Numéro de téléphone" value={form.phoneNumber} onChange={(event) => setForm({ ...form, phoneNumber: event.target.value })} className={inputClass} />
-              <input type="number" placeholder="Ordre d'affichage" value={form.displayOrder ?? 1} onChange={(event) => setForm({ ...form, displayOrder: Number(event.target.value) })} className={inputClass} />
+              <input type="number" placeholder="Ordre d'affichage" value={form.displayOrder ?? 0} onChange={(event) => setForm({ ...form, displayOrder: Number(event.target.value) })} className={inputClass} />
               <label className="flex items-center gap-3 text-[#607D8B]"><input type="checkbox" checked={!!form.isPrimary} onChange={(event) => setForm({ ...form, isPrimary: event.target.checked })} /> Contact principal</label>
-              <label className="flex items-center gap-3 text-[#607D8B]"><input type="checkbox" checked={!!form.isEmergency} onChange={(event) => setForm({ ...form, isEmergency: event.target.checked })} /> Contact utile</label>
             </div>
             <button className="mt-5 w-full rounded-full bg-[#4F9F8A] px-6 py-3 font-semibold text-white hover:bg-[#428B78]">{editingId ? "Enregistrer" : "Ajouter"}</button>
           </form>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
+import CheckoutButton from "@/components/CheckoutButton";
 
 const steps = [
   { title: "1. Je clique", text: "Le senior appuie sur le bouton Je vais bien depuis un écran très simple." },
@@ -61,7 +62,7 @@ export default function HomePage() {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-[#263238]">Des offres simples</h2>
             <p className="mx-auto mt-3 max-w-2xl text-[#607D8B]">
-              Une base commerciale claire pour présenter le service et préparer l'ajout du paiement en ligne.
+              Choisissez une formule ou demandez une activation accompagnée.
             </p>
           </div>
 
@@ -74,9 +75,13 @@ export default function HomePage() {
                 <ul className="mt-5 space-y-2 text-sm text-[#607D8B]">
                   {plan.features.map((feature) => <li key={feature}>✓ {feature}</li>)}
                 </ul>
-                <Link href="/activation" className="mt-6 flex min-h-12 items-center justify-center rounded-full bg-[#4F9F8A] px-5 font-semibold text-white hover:bg-[#428B78]">
-                  Choisir cette formule
-                </Link>
+                {plan.name === "Découverte" ? (
+                  <Link href="/activation" className="mt-6 flex min-h-12 items-center justify-center rounded-full bg-[#4F9F8A] px-5 font-semibold text-white hover:bg-[#428B78]">
+                    Demander l’activation
+                  </Link>
+                ) : (
+                  <CheckoutButton planName={plan.name} label={`Choisir ${plan.name}`} />
+                )}
               </div>
             ))}
           </div>

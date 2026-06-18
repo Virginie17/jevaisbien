@@ -31,7 +31,6 @@ export const demoContacts: FavoriteContact[] = [
     relationship: "Contact utile",
     phoneNumber: "+33611223344",
     isPrimary: false,
-    isEmergency: true,
     displayOrder: 4,
   },
 ];
